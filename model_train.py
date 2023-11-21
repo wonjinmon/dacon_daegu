@@ -25,13 +25,15 @@ if __name__ == "__main__":
     seed_everything(42)
 
     # df read
-    train_df = pd.read_csv("data/modified_train.csv")
-    test_df = pd.read_csv("data/modified_test.csv")
+    train_df = pd.read_csv("data/TE_add_columns_train.csv")
+    test_df = pd.read_csv("data/TE_add_columns_test.csv")
 
     test_x = test_df.drop(columns=["ID"]).copy()
     train_x = train_df[test_x.columns].copy()
     train_y = train_df["ECLO"].copy()
 
+    train_x = train_x.drop(columns=['Unnamed: 0', 'Unnamed: 0.1'])
+    test_x = test_x.drop(columns=['Unnamed: 0', 'Unnamed: 0.1'])
     # encoding
     categorical_features = list(train_x.dtypes[train_x.dtypes == "object"].index)
 
@@ -44,8 +46,8 @@ if __name__ == "__main__":
     train_preds = np.zeros(len(train_x))
     test_preds = np.zeros(len(test_x))
 
-    skf = KFold(n_splits=5, shuffle=True, random_state=42)
-    # skf = StratifiedKFold(n_splits=5, shuffle=True, random_state=42)
+    # skf = KFold(n_splits=5, shuffle=True, random_state=42)
+    skf = StratifiedKFold(n_splits=5, shuffle=True, random_state=42)
     for i, (train_index, valid_index) in enumerate(skf.split(train_x, train_y)):
         dtrain = Pool(
             data=train_x.values[train_index], label=train_y.values[train_index]
@@ -57,7 +59,7 @@ if __name__ == "__main__":
             iterations=1000,
             objective="RMSE",
             learning_rate=0.01,
-            l2_leaf_reg=3,
+            l2_leaf_reg=6,
             depth=4,
             random_seed=42,
             subsample=0.7,
@@ -71,9 +73,8 @@ if __name__ == "__main__":
     sample_submission = pd.read_csv("data/sample_submission.csv")
     baseline_submission = sample_submission.copy()
     baseline_submission["ECLO"] = test_preds.astype(int)
-    baseline_submission.to_csv("result/baseline_submit.csv", index=False)
+    baseline_submission.to_csv("result/cb_te_strfk.csv", index=False)
     print("end")
-
 
 # seed_everything(42)
 
