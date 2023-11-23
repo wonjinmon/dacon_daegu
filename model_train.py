@@ -73,7 +73,7 @@ if __name__ == "__main__":
     sample_submission = pd.read_csv("data/sample_submission.csv")
     baseline_submission = sample_submission.copy()
     baseline_submission["ECLO"] = test_preds.astype(int)
-    baseline_submission.to_csv("result/cb_te_strfk.csv", index=False)
+    baseline_submission.to_csv("result/catboost_te_strfk0_mean.csv", index=False)
     print("end")
 
 # seed_everything(42)
