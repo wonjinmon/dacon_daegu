@@ -5,6 +5,7 @@ import pandas as pd
 
 from category_encoders.target_encoder import TargetEncoder
 from sklearn.model_selection import StratifiedKFold, KFold
+from sklearn.preprocessing import MinMaxScaler, StandardScaler, RobustScaler
 from catboost import CatBoostRegressor, Pool
 
 # from sklearn.preprocessing import LabelEncoder, OneHotEncoder
@@ -12,6 +13,12 @@ from catboost import CatBoostRegressor, Pool
 # import xgboost as xgb
 # import lightgbm as lgb
 # from sklearn.ensemble import AdaBoostRegressor
+
+# import argparse
+
+# parser = argparse.ArgumentParser()
+# parser.add_argument('--')
+# parser.parse_args()
 
 
 def seed_everything(seed):
@@ -41,6 +48,10 @@ if __name__ == "__main__":
         te = TargetEncoder(cols=[i])
         train_x[i] = te.fit_transform(train_x[i], train_y)
         test_x[i] = te.transform(test_x[i])
+    
+    scaler = RobustScaler()
+    train_x = scaler.fit_transform(train_x)
+    test_x = scaler.fit_transform(test_x)
 
     # model train
     train_preds = np.zeros(len(train_x))
@@ -50,10 +61,10 @@ if __name__ == "__main__":
     skf = StratifiedKFold(n_splits=5, shuffle=True, random_state=42)
     for i, (train_index, valid_index) in enumerate(skf.split(train_x, train_y)):
         dtrain = Pool(
-            data=train_x.values[train_index], label=train_y.values[train_index]
+            data=train_x[train_index], label=train_y[train_index]
         )
         dvalid = Pool(
-            data=train_x.values[valid_index], label=train_y.values[valid_index]
+            data=train_x[valid_index], label=train_y[valid_index]
         )
         bst = CatBoostRegressor(
             iterations=1000,
@@ -67,13 +78,13 @@ if __name__ == "__main__":
             od_type="Iter",
         )
         bst.fit(X=dtrain, eval_set=dvalid)
-        test_preds += bst.predict(Pool(test_x.values)) / skf.n_splits
+        test_preds += bst.predict(Pool(test_x)) / skf.n_splits
 
     # save submit csv
     sample_submission = pd.read_csv("data/sample_submission.csv")
     baseline_submission = sample_submission.copy()
     baseline_submission["ECLO"] = test_preds.astype(int)
-    baseline_submission.to_csv("result/catboost_te_strfk0_mean.csv", index=False)
+    baseline_submission.to_csv("result/catboost_te_strfk0_mean_SS.csv", index=False)
     print("end")
 
 # seed_everything(42)
