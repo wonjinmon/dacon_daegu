@@ -2,3 +2,17 @@ catboost_info/
 data/
 result/
 onehottest.ipynb
+
+1130EDA.ipynb
+1201EDA copy.ipynb
+1203.ipynb
+1204_fillna.ipynb
+1206_make_csv_1.ipynb
+1206_make_csv_kang.ipynb
+EDA.ipynb
+model_train.py
+parking_data_test.ipynb
+RMSLE_CatBoost.py
+TargetEncoder.ipynb
+
+pytorch_train.py
